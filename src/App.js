@@ -1,25 +1,46 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useReducer } from 'react';
 import './App.css';
+import TodoList from "./Components/TodoList";
+
+const initialState = [
+{
+  text: "Wash Dog",
+  completed: false,
+  id: 1
+},
+{
+  text: "Buy Picture Frames",
+  completed: false,
+  id: 2
+}];
+
+const todoReducer = ((todoList, todoAction) => {
+  switch (todoAction.type) {
+    case "ADD_TODO":
+      return [...todoList, { text: todoAction.payload, completed: false, id: Date.now() }];
+    case "TOGGLE_TODO":
+      return todoList.map(todoItem => {
+        if (todoItem.id === todoAction.payload.id) {
+          todoItem.completed = !todoItem.completed;
+        }
+        return todoItem;
+      });
+    case "CLEAR_COMPLETED_TODOS":
+      return todoList.filter(todoItem => !todoItem.completed);
+    default:
+      break;
+  }
+});
 
 function App() {
+  const [todoList, dispatchTodo] = useReducer(todoReducer, initialState);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <TodoList
+      todoList={todoList} 
+      toggleTodo={(todoToToggle) => dispatchTodo({ type: "TOGGLE_TODO", payload: todoToToggle })}
+      addTodo={(newTodo) => dispatchTodo({ type: "ADD_TODO", payload: newTodo })}
+      clearCompleted={() => dispatchTodo({ type: "CLEAR_COMPLETED_TODOS" })} />
   );
 }
 
